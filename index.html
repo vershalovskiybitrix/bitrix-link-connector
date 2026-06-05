@@ -224,45 +224,42 @@ BX24.init(function() {
   var placementInfo = BX24.placement.info();
   var options = placementInfo.options || {};
 
-  // Если открыто в контексте Открытой линии (из настроек коннектора)
   if (options.LINE) {
-    var connectorId = options.CONNECTOR;
-    var lineId      = options.LINE;
-    var messenger   = messengerById(connectorId);
-
-    if (!messenger) {
-      showScreen('screen-setup');
-      return;
-    }
-    openConfigScreen(messenger, lineId);
+    var connector = messengerById(options.CONNECTOR);
+    if (!connector) { showScreen('screen-setup'); return; }
+    openConfigScreen(connector, options.LINE, 'open_lines');
+  } else if (options.ID) {
+    loadSetupScreen(options.ID);
   } else {
-    // Главная страница приложения
-    loadSetupScreen();
+    loadSetupScreen(null);
   }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Экран 1: Регистрация коннекторов
 // ─────────────────────────────────────────────────────────────────────────────
-function loadSetupScreen() {
+function loadSetupScreen(lineId) {
+  if (!lineId) {
+    BX24.callMethod('placement.bind', { PLACEMENT: 'CONTACT_CENTER', HANDLER: HANDLER_URL }, function() {});
+  }
   BX24.callMethod('imconnector.list', {}, function(result) {
     var registered = {};
     if (!result.error()) {
       (result.data() || []).forEach(function(c) { registered[c.ID] = true; });
     }
-    renderSetupGrid(registered);
+    renderSetupGrid(registered, lineId);
     showScreen('screen-setup');
   });
 }
 
-function renderSetupGrid(registered) {
+function renderSetupGrid(registered, lineId) {
   var grid = document.getElementById('setup-grid');
   grid.innerHTML = '';
 
   MESSENGERS.forEach(function(m) {
     var card = document.createElement('div');
     card.className = 'm-card' + (registered[m.id] ? ' registered' : '');
-    if (registered[m.id]) { card.style.cursor = 'default'; }
+    if (!lineId && registered[m.id]) { card.style.cursor = 'default'; }
 
     card.innerHTML =
       '<img src="' + m.icon + '" alt="' + m.name + '">' +
@@ -270,10 +267,32 @@ function renderSetupGrid(registered) {
       '<span class="m-tag">✓ зарегистрирован</span>';
 
     card.addEventListener('click', function() {
-      registerMessenger(m, card, registered);
+      if (lineId) {
+        registered[m.id] ? openConfigScreen(m, lineId, 'contact_center') : registerAndConfig(m, card, lineId);
+      } else {
+        registerMessenger(m, card, registered);
+      }
     });
 
     grid.appendChild(card);
+  });
+}
+
+function registerAndConfig(m, card, lineId) {
+  card.style.opacity = '.5';
+  card.style.pointerEvents = 'none';
+  BX24.callMethod('imconnector.register', {
+    ID: m.id, NAME: m.name,
+    ICON: { DATA_IMAGE: m.icon, COLOR: m.color },
+    PLACEMENT_HANDLER: HANDLER_URL
+  }, function(result) {
+    card.style.opacity = '';
+    card.style.pointerEvents = '';
+    if (result.error()) {
+      alert('Ошибка регистрации ' + m.name + ': ' + errMsg(result.error()));
+      return;
+    }
+    openConfigScreen(m, lineId, 'contact_center');
   });
 }
 
@@ -310,7 +329,7 @@ function registerMessenger(m, card, registered) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Экран 2: Настройка коннектора на Открытой линии
 // ─────────────────────────────────────────────────────────────────────────────
-function openConfigScreen(messenger, lineId) {
+function openConfigScreen(messenger, lineId, source) {
   document.getElementById('cfg-icon').src   = messenger.icon;
   document.getElementById('cfg-title').textContent = messenger.name;
   document.getElementById('input-name').value = messenger.name;
@@ -338,7 +357,7 @@ function openConfigScreen(messenger, lineId) {
 
   // Кнопка «Назад» возвращает на главную
   document.getElementById('back-btn').onclick = function() {
-    loadSetupScreen();
+    loadSetupScreen(source === 'contact_center' ? lineId : null);
   };
 
   // Кнопка «Сохранить»
