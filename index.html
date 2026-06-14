@@ -7,420 +7,565 @@
 <script src="//api.bitrix24.com/api/v1/"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-       font-size: 14px; color: #333; background: #fff; padding: 20px; }
-
-/* ── Экран регистрации (главная страница) ── */
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #333; background: #fff; padding: 20px; }
 .screen { display: none; }
 .screen.active { display: block; }
-
-h2 { font-size: 17px; font-weight: 600; margin-bottom: 16px; color: #1a1a1a; }
-
-.messenger-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.m-card {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 14px 8px 10px;
-  border: 1.5px solid #e4e8ed;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
-  user-select: none;
-}
+#s-load { text-align: center; padding: 48px; color: #888; }
+h2 { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
+h3 { font-size: 14px; font-weight: 600; color: #444; margin: 16px 0 8px; }
+.desc { color: #666; font-size: 13px; line-height: 1.6; margin-bottom: 4px; }
+hr { border: none; border-top: 1px solid #eaecef; margin: 16px 0; }
+.chk-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; user-select: none; border-bottom: 1px solid #f0f2f5; }
+.chk-row:last-child { border-bottom: none; }
+.chk-row input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: #2baef5; flex-shrink: 0; }
+.chk-row img { width: 28px; height: 28px; flex-shrink: 0; }
+.chk-row span { font-size: 14px; }
+.m-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; margin-bottom: 16px; }
+.m-card { display: flex; flex-direction: column; align-items: center; padding: 10px 6px 8px; border: 1.5px solid #e4e8ed; border-radius: 10px; cursor: pointer; transition: border-color .15s, background .15s; user-select: none; }
 .m-card:hover { border-color: #2baef5; background: #f4fbff; }
-.m-card.registered { border-color: #c3e6cb; background: #f4fff8; cursor: default; }
-.m-card.registered:hover { border-color: #c3e6cb; background: #f4fff8; }
-.m-card img { width: 44px; height: 44px; margin-bottom: 6px; }
-.m-card .m-name { font-size: 12px; text-align: center; line-height: 1.3; }
-.m-card .m-tag {
-  font-size: 10px; color: #28a745; margin-top: 3px;
-  display: none;
-}
-.m-card.registered .m-tag { display: block; }
-
-.hint { font-size: 13px; color: #666; line-height: 1.5; background: #f8f9fa;
-        padding: 10px 14px; border-radius: 8px; margin-top: 12px; }
-.hint strong { color: #333; }
-
-/* ── Экран настройки коннектора ── */
-.cfg-header {
-  display: flex; align-items: center; gap: 12px;
-  padding-bottom: 16px; margin-bottom: 18px;
-  border-bottom: 1px solid #eaecef;
-}
-.cfg-header img { width: 36px; height: 36px; }
-.cfg-header .cfg-title { font-size: 16px; font-weight: 600; }
-
-.field-group { margin-bottom: 16px; }
-.field-group label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; font-weight: 500; }
-.field-group input[type=text],
-.field-group input[type=url] {
-  width: 100%; padding: 9px 12px;
-  border: 1.5px solid #dde1e7; border-radius: 8px;
-  font-size: 14px; color: #222;
-  outline: none; transition: border-color .15s;
-}
-.field-group input:focus { border-color: #2baef5; }
-
-.icon-preview { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-.icon-preview img { width: 32px; height: 32px; border-radius: 50%; }
-.icon-preview span { font-size: 12px; color: #888; }
-
-.btn-row { display: flex; gap: 10px; align-items: center; margin-top: 20px; }
-.btn {
-  padding: 10px 22px; border: none; border-radius: 8px;
-  font-size: 14px; font-weight: 500; cursor: pointer;
-  transition: background .15s, opacity .15s;
-}
-.btn-primary { background: #2baef5; color: #fff; }
-.btn-primary:hover { background: #1a9ed8; }
-.btn-primary:disabled { opacity: .6; cursor: default; }
-.btn-ghost { background: none; color: #888; padding: 10px 0; }
-.btn-ghost:hover { color: #333; }
-
-.error-msg { color: #c0392b; font-size: 13px; margin-top: 8px; display: none; }
-.success-msg { color: #27ae60; font-size: 13px; margin-top: 8px; display: none; }
-
-/* Spinner */
-.loading { text-align: center; padding: 48px; color: #888; font-size: 14px; }
+.m-card.selected { border-color: #2baef5; background: #e8f6ff; }
+.m-card img { width: 36px; height: 36px; margin-bottom: 5px; border-radius: 6px; }
+.m-card .lbl { font-size: 11px; text-align: center; line-height: 1.3; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 13px; color: #555; font-weight: 500; margin-bottom: 5px; }
+.field input[type=text], .field input[type=url], .field select {
+  width: 100%; padding: 9px 12px; border: 1.5px solid #dde1e7; border-radius: 8px;
+  font-size: 14px; color: #222; background: #fff; outline: none; transition: border-color .15s; }
+.field input:focus, .field select:focus { border-color: #2baef5; }
+.icon-row { display: flex; align-items: center; gap: 12px; }
+.icon-row img { width: 40px; height: 40px; border-radius: 8px; border: 1px solid #eaecef; }
+.btn { padding: 10px 22px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; background: #2baef5; color: #fff; transition: background .15s; margin-top: 4px; }
+.btn:hover { background: #1a9ed8; }
+.btn:disabled { opacity: .6; cursor: default; }
+.btn-sm { padding: 6px 12px; border: 1px solid #dde1e7; border-radius: 6px; background: #fff; font-size: 12px; color: #555; cursor: pointer; }
+.btn-sm:hover { background: #f5f6f8; }
+.err { color: #c0392b; font-size: 13px; margin: 8px 0; display: none; }
+.ok { color: #27ae60; font-size: 13px; margin: 8px 0; display: none; }
+.hint { font-size: 12px; color: #999; margin-top: 4px; line-height: 1.5; }
+.cc-icon { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.cc-icon img { width: 40px; height: 40px; border-radius: 8px; }
+.cc-icon strong { font-size: 15px; }
 </style>
 </head>
 <body>
 
-<!-- Экран 1: статус / список мессенджеров (главная страница приложения) -->
-<div id="screen-setup" class="screen">
-  <h2>Свои ссылки на мессенджеры</h2>
-  <p style="color:#555;margin-bottom:16px;line-height:1.5;">
-    Выберите мессенджер, который нужно зарегистрировать как коннектор для Открытых линий.
-    После регистрации он появится в настройках любой Открытой линии.
-  </p>
-  <div class="messenger-grid" id="setup-grid"></div>
-  <p id="setup-status" class="success-msg" style="display:none"></p>
-  <div class="hint">
-    <strong>Инструкция:</strong><br>
-    1. Нажмите на мессенджер выше — он будет зарегистрирован как коннектор.<br>
-    2. Перейдите в <strong>Контакт-центр → Открытые линии</strong>, выберите нужную линию.<br>
-    3. В разделе коннекторов найдите зарегистрированный мессенджер и введите ссылку.<br>
-    4. Добавьте Открытую линию в <strong>Виджет на сайт</strong> — кнопка появится автоматически.
+<div id="s-load" class="screen active">Загрузка…</div>
+
+<!-- Активация (прямое открытие приложения) -->
+<div id="s-settings" class="screen">
+  <div id="s-activate-block">
+    <h2>Активация приложения</h2>
+    <p class="desc">Выберите мессенджеры, кнопки которых должны быть доступны в Контакт-центре, и нажмите <strong>Активировать</strong>.</p>
+    <p class="desc" style="margin-top:4px;color:#888;font-size:12px">Это нужно сделать один раз после установки. Коннекторы появятся в Контакт-центре сразу после активации.</p>
+    <hr>
+    <h3>Мессенджеры</h3>
+    <p class="hint" style="margin-bottom:8px">Снимите галочку, чтобы исключить мессенджер из Контакт-центра.</p>
+    <div id="chk-list"></div>
+    <p class="err" id="s-err">Выберите хотя бы один мессенджер.</p>
+    <button class="btn" id="s-save" style="margin-top:16px;width:100%;padding:12px;font-size:15px">Активировать</button>
+  </div>
+  <div id="s-done-block" style="display:none;text-align:center;padding:20px 0">
+    <div style="font-size:40px;margin-bottom:12px">✓</div>
+    <h2 style="color:#27ae60;margin-bottom:10px">Коннекторы активированы!</h2>
+    <p class="desc">Перейдите в <strong>Контакт-центр</strong> — там появились кнопки выбранных мессенджеров.</p>
+    <p class="desc" style="margin-top:8px">Нажмите на нужный мессенджер, выберите Открытую линию и введите ссылку.</p>
+    <hr>
+    <button class="btn" id="s-reopen" style="margin-top:8px;background:#eee;color:#333">Изменить список мессенджеров</button>
   </div>
 </div>
 
-<!-- Экран 2: настройка конкретного коннектора на линии -->
-<div id="screen-config" class="screen">
-  <button class="btn btn-ghost" id="back-btn">← Назад</button>
-  <div class="cfg-header">
-    <img id="cfg-icon" src="" alt="">
-    <span class="cfg-title" id="cfg-title"></span>
-  </div>
-
-  <div class="field-group">
-    <label for="input-name">Название кнопки в виджете</label>
-    <input type="text" id="input-name" placeholder="Например: Telegram">
-  </div>
-
-  <div class="field-group">
-    <label for="input-url">Ссылка на мессенджер</label>
-    <input type="url" id="input-url" placeholder="https://...">
-  </div>
-
-  <div class="field-group" id="custom-icon-field" style="display:none">
-    <label for="input-icon">Иконка (URL изображения, необязательно)</label>
-    <input type="url" id="input-icon" placeholder="https://...">
-    <div class="icon-preview">
-      <img id="icon-preview-img" src="" alt="" style="display:none">
-      <span>Оставьте пустым, чтобы использовать иконку по умолчанию (🌐)</span>
+<!-- Диалог из плитки Контакт-центра -->
+<div id="s-dialog" class="screen">
+  <h2>Подключить ссылку на мессенджер</h2>
+  <p class="desc" style="margin-bottom:14px">Выберите мессенджер, введите ссылку и выберите Открытую линию.</p>
+  <div class="m-grid" id="d-grid"></div>
+  <div id="d-form" style="display:none">
+    <hr style="margin-bottom:14px">
+    <div class="field">
+      <label>Иконка</label>
+      <div class="icon-row">
+        <img id="d-icon-preview" src="" width="40" height="40">
+        <div>
+          <button type="button" class="btn-sm" id="d-icon-btn">Изменить</button>
+          <button type="button" class="btn-sm" id="d-icon-reset">Сбросить</button>
+          <input type="file" id="d-icon-input" accept=".png,.jpg,.jpeg,.svg" style="display:none">
+        </div>
+      </div>
+      <p class="hint">PNG, JPG, SVG · рекомендуемый размер: 40×40 пикселей</p>
     </div>
-  </div>
-
-  <p class="error-msg" id="cfg-error"></p>
-  <p class="success-msg" id="cfg-success"></p>
-
-  <div class="btn-row">
-    <button class="btn btn-primary" id="save-btn">Сохранить</button>
+    <div class="field"><label id="d-url-label">Ссылка</label><input type="text" id="d-url" placeholder="https://…"></div>
+    <div class="field"><label>Название кнопки в виджете</label><input type="text" id="d-name" placeholder="Например: Telegram"></div>
+    <div class="field"><label>Открытая линия</label><select id="d-line"><option value="">— загрузка… —</option></select></div>
+    <p class="err" id="d-err"></p>
+    <button class="btn" id="d-save">Подключить</button>
+    <p class="ok" id="d-ok">✓ Готово! Добавьте Открытую линию в виджет на сайте.</p>
   </div>
 </div>
 
-<!-- Лоадер -->
-<div id="screen-loading" class="loading screen active">Загрузка…</div>
+<!-- PLACEMENT_HANDLER (из Открытых линий) -->
+<div id="s-pl" class="screen">
+  <div class="cc-icon" id="pl-header"></div>
+  <div class="field">
+    <label>Иконка</label>
+    <div class="icon-row">
+      <img id="pl-icon-preview" src="" width="40" height="40">
+      <div>
+        <button type="button" class="btn-sm" id="pl-icon-btn">Изменить</button>
+        <button type="button" class="btn-sm" id="pl-icon-reset">Сбросить</button>
+        <input type="file" id="pl-icon-input" accept=".png,.jpg,.jpeg,.svg" style="display:none">
+      </div>
+    </div>
+    <p class="hint">PNG, JPG, SVG · рекомендуемый размер: 40×40 пикселей</p>
+  </div>
+  <div class="field"><label id="pl-url-label">Ссылка</label><input type="text" id="pl-url" placeholder="https://…"></div>
+  <div class="field"><label>Название кнопки в виджете</label><input type="text" id="pl-name"></div>
+  <p class="err" id="pl-err"></p>
+  <button class="btn" id="pl-save">Сохранить</button>
+  <p class="ok" id="pl-ok">✓ Сохранено!</p>
+</div>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-// TODO: замените на URL этого файла после деплоя (GitHub Pages / хостинг)
-// ─────────────────────────────────────────────────────────────────────────────
-var HANDLER_URL = 'https://vershalovskiybitrix.github.io/bitrix-link-connector/';
+var HANDLER_URL = window.location.href.split('?')[0];
+var enabledIds  = null;
+var customIcons = {};
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SVG-иконки мессенджеров (data URI)
-// ─────────────────────────────────────────────────────────────────────────────
-function toDataUri(svg) {
-  return 'data:image/svg+xml,' + encodeURIComponent(svg);
-}
-
-var ICONS = {
-  telegram: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#2CA5E0"/><path d="M29.2 12.1L5.9 21c-1.6.6-1.5 1.6-.3 2l5.9 1.8 13.7-8.6c.6-.4 1.2-.2.7.3L14.3 26l-.4 5.7c.6 0 .9-.3 1.2-.6l2.9-2.8 5.9 4.4c1.1.6 1.9.3 2.2-1L30.8 14c.4-1.7-.7-2.5-1.6-1.9z" fill="white"/></svg>'),
-  whatsapp: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#25D366"/><path d="M20 10c-5.5 0-10 4.5-10 10 0 1.9.5 3.7 1.5 5.2L10 31l6-1.5C17.4 30.5 18.7 31 20 31c5.5 0 10-4.5 10-10S25.5 10 20 10zm5 13.7c-.2.6-1.3 1.1-1.8 1.2-.5.1-.9.2-2.8-.6-2.4-1-3.9-3.4-4-3.6-.1-.2-1-1.3-1-2.5 0-1.2.6-1.8.8-2 .2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.5.8-.1.2c.2.3.9 1.4 1.8 2.1 1.2 1 2.2 1.3 2.5 1.5.3.1.5 0 .7-.2l.8-1c.2-.3.4-.2.7-.1l2 1c.2.1.4.2.5.4.1.3 0 .9-.3 1.4z" fill="white"/></svg>'),
-  vk: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#2787F5"/><path d="M29.5 15.3c.2-.6 0-.9-.7-.9h-2.3c-.6 0-.9.3-1.1.7 0 0-1.2 3-3 5-.6.5-.8.7-1.1.7-.2 0-.4-.3-.4-.8v-4.8c0-.6-.2-.8-.7-.8h-3.7c-.4 0-.6.3-.6.5 0 .5.8.7.9 2.3v3.4c0 .8-.1 1-.4 1-.8 0-2.8-3-4-6.4-.2-.6-.4-.8-1-.8h-2.3c-.7 0-.8.3-.8.7 0 .7.8 4 3.8 8.4 2 2.8 4.7 4.3 7.2 4.3 1.5 0 1.7-.3 1.7-.9v-2.1c0-.7.1-.8.7-.8.4 0 1.1.2 2.6 1.8 1.8 1.8 2.1 2.7 3 2.7h2.3c.7 0 1.1-.3.9-1-.2-.7-1-1.7-2-3-.6-.7-1.4-1.5-1.7-2-.2-.4-.1-.5 0-.9 0 0 2.7-3.9 3.5-5.3z" fill="white"/></svg>'),
-  viber: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#7360F2"/><path d="M27.2 13.2C25.2 11.5 20.4 11 20 11c-.4 0-5.2.5-7.2 2.2-2 1.9-2.1 4.6-1.9 6.5.2 1.8.8 3.4 2 4.7 1 1.1 2.4 2 4.3 2.5v2.8c0 .3.3.5.6.3l3-2.8c1.5.2 5.3-.2 7.2-2.5 1.6-2 1.7-5.5-.8-11.5zm-3.5 9c-.2.4-.6.9-1.1 1.2-.3.2-.5.2-.8.2-.2 0-.4 0-.6-.1-.8-.3-1.9-.9-3-2.1-1.2-1.1-1.8-2.3-2.1-3.1-.2-.5-.2-1 0-1.3.2-.5.6-.9 1-1.1.5-.3 1.1.1 1.4.5l1.1 1.7c.2.3.2.7-.1 1l-.4.5c-.1.1-.1.3 0 .4.3.5.7 1 1.2 1.5.5.5 1 .9 1.5 1.2.1.1.3.1.4 0l.5-.4c.3-.3.7-.3 1-.1l1.7 1.1c.5.2.8.8.3 1.4z" fill="white"/></svg>'),
-  signal: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#3A76F0"/><circle cx="20" cy="20" r="8" stroke="white" stroke-width="2" fill="none"/><circle cx="20" cy="20" r="3" fill="white"/><line x1="20" y1="8" x2="20" y2="6" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="34" x2="20" y2="32" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="20" x2="6" y2="20" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="34" y1="20" x2="32" y2="20" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="11.5" y1="11.5" x2="10" y2="10" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="11.5" x2="31.5" y2="10" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="11.5" y1="28.5" x2="10" y2="30" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="28.5" x2="31.5" y2="30" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>'),
-  instagram: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><radialGradient id="ig" cx="30%" cy="110%" r="140%"><stop offset="0%" stop-color="#ffd879"/><stop offset="25%" stop-color="#f77737"/><stop offset="55%" stop-color="#f56040"/><stop offset="75%" stop-color="#c13584"/><stop offset="100%" stop-color="#405de6"/></radialGradient></defs><rect width="40" height="40" rx="20" fill="url(#ig)"/><rect x="10" y="10" width="20" height="20" rx="6" stroke="white" stroke-width="2" fill="none"/><circle cx="20" cy="20" r="5.5" stroke="white" stroke-width="2" fill="none"/><circle cx="27" cy="13" r="1.8" fill="white"/></svg>'),
-  wechat: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#09BB07"/><ellipse cx="15.5" cy="18" rx="7" ry="5.5" fill="white"/><circle cx="13" cy="17.5" r="1.3" fill="#09BB07"/><circle cx="18" cy="17.5" r="1.3" fill="#09BB07"/><ellipse cx="24.5" cy="22.5" rx="6" ry="4.5" fill="rgba(255,255,255,.9)"/><circle cx="22.5" cy="22.5" r="1.1" fill="#09BB07"/><circle cx="26.5" cy="22.5" r="1.1" fill="#09BB07"/></svg>'),
-  max: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="10" fill="#1369C6"/><text x="20" y="27" font-family="Arial,sans-serif" font-weight="900" font-size="18" text-anchor="middle" fill="white">MAX</text></svg>'),
-  web: toDataUri('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#78909C"/><circle cx="20" cy="20" r="9" stroke="white" stroke-width="1.8" fill="none"/><line x1="11" y1="20" x2="29" y2="20" stroke="white" stroke-width="1.8"/><line x1="20" y1="11" x2="20" y2="29" stroke="white" stroke-width="1.8"/><path d="M13.5 15.5q6.5 2 13 0M13.5 24.5q6.5-2 13 0" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>')
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Конфигурация мессенджеров
-// ─────────────────────────────────────────────────────────────────────────────
-var MESSENGERS = [
-  { id: 'clnk_telegram',   name: 'Telegram',   color: '#2CA5E0', icon: ICONS.telegram,  urlTemplate: 'https://t.me/' },
-  { id: 'clnk_whatsapp',   name: 'WhatsApp',   color: '#25D366', icon: ICONS.whatsapp,  urlTemplate: 'https://wa.me/' },
-  { id: 'clnk_vk',         name: 'VK',         color: '#2787F5', icon: ICONS.vk,        urlTemplate: 'https://vk.me/' },
-  { id: 'clnk_viber',      name: 'Viber',      color: '#7360F2', icon: ICONS.viber,     urlTemplate: 'viber://chat?number=%2B' },
-  { id: 'clnk_signal',     name: 'Signal',     color: '#3A76F0', icon: ICONS.signal,    urlTemplate: 'https://signal.me/#p/%2B' },
-  { id: 'clnk_instagram',  name: 'Instagram',  color: '#C13584', icon: ICONS.instagram, urlTemplate: 'https://instagram.com/' },
-  { id: 'clnk_wechat',     name: 'WeChat',     color: '#09BB07', icon: ICONS.wechat,    urlTemplate: 'https://work.weixin.qq.com/' },
-  { id: 'clnk_max',        name: 'MAX',        color: '#1369C6', icon: ICONS.max,       urlTemplate: 'https://max.ru/' },
-  { id: 'clnk_web',        name: 'Своя ссылка',color: '#78909C', icon: ICONS.web,       urlTemplate: '' }
+var DEFAULT_ENABLED = [
+  'clnk_telegram','clnk_whatsapp','clnk_vk','clnk_viber',
+  'clnk_signal','clnk_instagram','clnk_wechat','clnk_max','clnk_email','clnk_web1'
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Вспомогательные функции
-// ─────────────────────────────────────────────────────────────────────────────
+var SVG = {
+  telegram:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#2CA5E0"/><path d="M29.2 12.1L5.9 21c-1.6.6-1.5 1.6-.3 2l5.9 1.8 13.7-8.6c.6-.4 1.2-.2.7.3L14.3 26l-.4 5.7c.6 0 .9-.3 1.2-.6l2.9-2.8 5.9 4.4c1.1.6 1.9.3 2.2-1L30.8 14c.4-1.7-.7-2.5-1.6-1.9z" fill="white"/></svg>',
+  whatsapp:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#25D366"/><path d="M20 10c-5.5 0-10 4.5-10 10 0 1.9.5 3.7 1.5 5.2L10 31l6-1.5C17.4 30.5 18.7 31 20 31c5.5 0 10-4.5 10-10S25.5 10 20 10zm5 13.7c-.2.6-1.3 1.1-1.8 1.2-.5.1-.9.2-2.8-.6-2.4-1-3.9-3.4-4-3.6-.1-.2-1-1.3-1-2.5 0-1.2.6-1.8.8-2 .2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.5.8-.1.2c.2.3.9 1.4 1.8 2.1 1.2 1 2.2 1.3 2.5 1.5.3.1.5 0 .7-.2l.8-1c.2-.3.4-.2.7-.1l2 1c.2.1.4.2.5.4.1.3 0 .9-.3 1.4z" fill="white"/></svg>',
+  vk:        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#2787F5"/><path d="M29.5 15.3c.2-.6 0-.9-.7-.9h-2.3c-.6 0-.9.3-1.1.7 0 0-1.2 3-3 5-.6.5-.8.7-1.1.7-.2 0-.4-.3-.4-.8v-4.8c0-.6-.2-.8-.7-.8h-3.7c-.4 0-.6.3-.6.5 0 .5.8.7.9 2.3v3.4c0 .8-.1 1-.4 1-.8 0-2.8-3-4-6.4-.2-.6-.4-.8-1-.8h-2.3c-.7 0-.8.3-.8.7 0 .7.8 4 3.8 8.4 2 2.8 4.7 4.3 7.2 4.3 1.5 0 1.7-.3 1.7-.9v-2.1c0-.7.1-.8.7-.8.4 0 1.1.2 2.6 1.8 1.8 1.8 2.1 2.7 3 2.7h2.3c.7 0 1.1-.3.9-1-.2-.7-1-1.7-2-3-.6-.7-1.4-1.5-1.7-2-.2-.4-.1-.5 0-.9 0 0 2.7-3.9 3.5-5.3z" fill="white"/></svg>',
+  viber:     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#7360F2"/><path d="M27.2 13.2C25.2 11.5 20.4 11 20 11c-.4 0-5.2.5-7.2 2.2-2 1.9-2.1 4.6-1.9 6.5.2 1.8.8 3.4 2 4.7 1 1.1 2.4 2 4.3 2.5v2.8c0 .3.3.5.6.3l3-2.8c1.5.2 5.3-.2 7.2-2.5 1.6-2 1.7-5.5-.8-11.5zm-3.5 9c-.2.4-.6.9-1.1 1.2-.3.2-.5.2-.8.2-.2 0-.4 0-.6-.1-.8-.3-1.9-.9-3-2.1-1.2-1.1-1.8-2.3-2.1-3.1-.2-.5-.2-1 0-1.3.2-.5.6-.9 1-1.1.5-.3 1.1.1 1.4.5l1.1 1.7c.2.3.2.7-.1 1l-.4.5c-.1.1-.1.3 0 .4.3.5.7 1 1.2 1.5.5.5 1 .9 1.5 1.2.1.1.3.1.4 0l.5-.4c.3-.3.7-.3 1-.1l1.7 1.1c.5.2.8.8.3 1.4z" fill="white"/></svg>',
+  signal:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#3A76F0"/><circle cx="20" cy="20" r="8" stroke="white" stroke-width="2" fill="none"/><circle cx="20" cy="20" r="3" fill="white"/><line x1="20" y1="8" x2="20" y2="6" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="34" x2="20" y2="32" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="20" x2="6" y2="20" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="34" y1="20" x2="32" y2="20" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="11.5" y1="11.5" x2="10" y2="10" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="11.5" x2="31.5" y2="10" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="11.5" y1="28.5" x2="10" y2="30" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="28.5" x2="31.5" y2="30" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>',
+  instagram: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><radialGradient id="ig" cx="30%" cy="110%" r="140%"><stop offset="0%" stop-color="#ffd879"/><stop offset="25%" stop-color="#f77737"/><stop offset="55%" stop-color="#f56040"/><stop offset="75%" stop-color="#c13584"/><stop offset="100%" stop-color="#405de6"/></radialGradient></defs><rect width="40" height="40" rx="20" fill="url(#ig)"/><rect x="10" y="10" width="20" height="20" rx="6" stroke="white" stroke-width="2" fill="none"/><circle cx="20" cy="20" r="5.5" stroke="white" stroke-width="2" fill="none"/><circle cx="27" cy="13" r="1.8" fill="white"/></svg>',
+  wechat:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#09BB07"/><ellipse cx="15.5" cy="18" rx="7" ry="5.5" fill="white"/><circle cx="13" cy="17.5" r="1.3" fill="#09BB07"/><circle cx="18" cy="17.5" r="1.3" fill="#09BB07"/><ellipse cx="24.5" cy="22.5" rx="6" ry="4.5" fill="rgba(255,255,255,.9)"/><circle cx="22.5" cy="22.5" r="1.1" fill="#09BB07"/><circle cx="26.5" cy="22.5" r="1.1" fill="#09BB07"/></svg>',
+  max:       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#1369C6"/><text x="20" y="27" font-family="Arial,sans-serif" font-weight="900" font-size="18" text-anchor="middle" fill="white">M</text></svg>',
+  web:       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#78909C"/><circle cx="20" cy="20" r="9" stroke="white" stroke-width="1.8" fill="none"/><line x1="11" y1="20" x2="29" y2="20" stroke="white" stroke-width="1.8"/><line x1="20" y1="11" x2="20" y2="29" stroke="white" stroke-width="1.8"/><path d="M13.5 15.5q6.5 2 13 0M13.5 24.5q6.5-2 13 0" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
+  mail:      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#5C8DEA"/><rect x="10" y="13" width="20" height="14" rx="2.5" fill="white"/><path d="M11 15l9 6 9-6" stroke="#5C8DEA" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+var MESSENGERS = [
+  { id: 'clnk_telegram',  name: 'Telegram',      color: '#2CA5E0', key: 'telegram',  url: 'https://t.me/' },
+  { id: 'clnk_whatsapp',  name: 'WhatsApp',      color: '#25D366', key: 'whatsapp',  url: 'https://wa.me/' },
+  { id: 'clnk_vk',        name: 'VK',            color: '#2787F5', key: 'vk',        url: 'https://vk.me/' },
+  { id: 'clnk_viber',     name: 'Viber',         color: '#7360F2', key: 'viber',     url: 'viber://chat?number=%2B' },
+  { id: 'clnk_signal',    name: 'Signal',        color: '#3A76F0', key: 'signal',    url: 'https://signal.me/#p/%2B' },
+  { id: 'clnk_instagram', name: 'Instagram',     color: '#C13584', key: 'instagram', url: 'https://instagram.com/' },
+  { id: 'clnk_wechat',    name: 'WeChat',        color: '#09BB07', key: 'wechat',    url: 'https://work.weixin.qq.com/' },
+  { id: 'clnk_max',       name: 'MAX',           color: '#1369C6', key: 'max',       url: 'https://max.ru/' },
+  { id: 'clnk_email',     name: 'E-mail',        color: '#5C8DEA', key: 'mail',      url: '', type: 'email' },
+  { id: 'clnk_web1',      name: 'Своя ссылка 1', color: '#78909C', key: 'web',       url: '' },
+  { id: 'clnk_web2',      name: 'Своя ссылка 2', color: '#78909C', key: 'web',       url: '' },
+  { id: 'clnk_web3',      name: 'Своя ссылка 3', color: '#78909C', key: 'web',       url: '' },
+  { id: 'clnk_web4',      name: 'Своя ссылка 4', color: '#78909C', key: 'web',       url: '' },
+  { id: 'clnk_web5',      name: 'Своя ссылка 5', color: '#78909C', key: 'web',       url: '' }
+];
+
+function imgSrc(key) { return 'data:image/svg+xml,' + encodeURIComponent(SVG[key]); }
+
+function imgB64(key) {
+  try { return 'data:image/svg+xml;base64,' + btoa(SVG[key]); }
+  catch(e) { return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(SVG[key]))); }
+}
+
+function getIconSrc(m) {
+  return customIcons[m.id] || imgSrc(m.key);
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   BX24.fitWindow();
 }
 
-function messengerById(id) {
-  return MESSENGERS.find(function(m) { return m.id === id; }) || null;
+function showErr(id, msg) { var el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; }
+function hideErr(id) { document.getElementById(id).style.display = 'none'; }
+
+function isValidUrl(s) {
+  try { new URL(s); return true; } catch(e) { return false; }
 }
 
-function showError(elId, msg) {
-  var el = document.getElementById(elId);
-  el.textContent = msg;
-  el.style.display = 'block';
+function isValidEmail(s) {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
 }
 
-function hideMsg(elId) {
-  document.getElementById(elId).style.display = 'none';
+function mailPageLink(email) {
+  return HANDLER_URL.replace(/[^/]*$/, 'mail.html') + '?to=' + encodeURIComponent(email);
 }
 
-function errMsg(err) {
-  if (!err) return '';
-  if (err.ex && err.ex.error_description) return err.ex.error_description;
-  if (err.ex && err.ex.error) return err.ex.error;
-  return String(err);
+function registerConnector(m, overrideIconB64, cb) {
+  var iconData = overrideIconB64 || customIcons[m.id] || imgB64(m.key);
+  BX24.callMethod('imconnector.register', {
+    ID: m.id, NAME: 'OpenLines - ' + m.name,
+    ICON: { DATA_IMAGE: iconData, COLOR: m.color },
+    PLACEMENT_HANDLER: HANDLER_URL
+  }, function(r) { if (cb) cb(r.error() || null); });
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Инициализация BX24
-// ─────────────────────────────────────────────────────────────────────────────
+function unregisterConnector(id, cb) {
+  BX24.callMethod('imconnector.unregister', { ID: id }, function(r) { if (cb) cb(r.error() || null); });
+}
+
+function setupIconUpload(inputId, btnId, previewId, errId, onLoad) {
+  document.getElementById(btnId).addEventListener('click', function() {
+    document.getElementById(inputId).click();
+  });
+  document.getElementById(inputId).addEventListener('change', function() {
+    var file = this.files[0];
+    if (!file) return;
+    if (file.size > 100 * 1024) {
+      showErr(errId, 'Файл слишком большой (максимум 100 КБ для иконки).');
+      this.value = '';
+      return;
+    }
+    hideErr(errId);
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById(previewId).src = e.target.result;
+      if (onLoad) onLoad(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ── Init ── */
 BX24.init(function() {
-  var placementInfo = BX24.placement.info();
-  var options = placementInfo.options || {};
+  BX24.fitWindow();
+  BX24.callMethod('placement.bind', { PLACEMENT: 'CONTACT_CENTER', HANDLER: HANDLER_URL }, function() {});
 
-  if (options.LINE) {
-    var connector = messengerById(options.CONNECTOR);
-    if (!connector) { showScreen('screen-setup'); return; }
-    openConfigScreen(connector, options.LINE, 'open_lines');
-  } else if (options.ID) {
-    loadSetupScreen(options.ID);
-  } else {
-    loadSetupScreen(null);
-  }
+  BX24.callMethod('app.option.get', {}, function(r) {
+    var data = (!r.error() && r.data()) ? r.data() : {};
+    try { enabledIds = data.enabled_messengers ? JSON.parse(data.enabled_messengers) : null; } catch(e) { enabledIds = null; }
+    if (!Array.isArray(enabledIds) || !enabledIds.length) enabledIds = DEFAULT_ENABLED.slice();
+    try { customIcons = data.custom_icons ? JSON.parse(data.custom_icons) : {}; } catch(e) { customIcons = {}; }
+
+    enabledIds.forEach(function(id) {
+      var m = MESSENGERS.find(function(x) { return x.id === id; });
+      if (m) registerConnector(m);
+    });
+
+    var info = BX24.placement.info();
+    var opts = info.options || {};
+    var pl   = info.placement || '';
+    var connectorId = opts.CONNECTOR || opts.connector || '';
+    var lineId      = String(opts.LINE || opts.LINE_ID || opts.ID || '');
+
+    if (connectorId || lineId) {
+      initPlacementScreen(connectorId, lineId);
+    } else if (pl === 'CONTACT_CENTER') {
+      initDialogScreen();
+    } else {
+      initSettingsScreen();
+    }
+  });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Экран 1: Регистрация коннекторов
-// ─────────────────────────────────────────────────────────────────────────────
-function loadSetupScreen(lineId) {
-  if (!lineId) {
-    BX24.callMethod('placement.bind', { PLACEMENT: 'CONTACT_CENTER', HANDLER: HANDLER_URL }, function() {});
-  }
-  BX24.callMethod('imconnector.list', {}, function(result) {
-    var registered = {};
-    if (!result.error()) {
-      (result.data() || []).forEach(function(c) { registered[c.ID] = true; });
-    }
-    renderSetupGrid(registered, lineId);
-    showScreen('screen-setup');
+/* ── Settings / Activation screen ── */
+function initSettingsScreen() {
+  var list = document.getElementById('chk-list');
+  MESSENGERS.forEach(function(m) {
+    var on = enabledIds.indexOf(m.id) !== -1;
+    var row = document.createElement('label');
+    row.className = 'chk-row';
+    var chk = document.createElement('input');
+    chk.type = 'checkbox'; chk.value = m.id; chk.checked = on;
+    var img = document.createElement('img');
+    img.src = getIconSrc(m); img.width = 28; img.height = 28;
+    var lbl = document.createElement('span');
+    lbl.textContent = m.name;
+    row.appendChild(chk); row.appendChild(img); row.appendChild(lbl);
+    list.appendChild(row);
   });
+
+  document.getElementById('s-save').addEventListener('click', function() {
+    var checked = Array.prototype.slice.call(
+      document.querySelectorAll('#chk-list input:checked')
+    ).map(function(c) { return c.value; });
+
+    if (!checked.length) { showErr('s-err', 'Выберите хотя бы один мессенджер.'); return; }
+    hideErr('s-err');
+
+    var btn = document.getElementById('s-save');
+    btn.disabled = true; btn.textContent = 'Активация…';
+
+    var toRemove    = enabledIds.filter(function(id) { return checked.indexOf(id) === -1; });
+    var unregFailed = [];
+
+    function afterUnregister() {
+      BX24.callMethod('app.option.set', { options: { enabled_messengers: JSON.stringify(checked) } }, function(rOpt) {
+        if (rOpt.error()) {
+          btn.disabled = false; btn.textContent = 'Активировать';
+          showErr('s-err', 'Не удалось сохранить настройки. Попробуйте ещё раз.');
+          return;
+        }
+        enabledIds = checked;
+        var done = 0;
+        var regFailed = [];
+        checked.forEach(function(id) {
+          var m = MESSENGERS.find(function(x) { return x.id === id; });
+          if (m) registerConnector(m, null, function(err) {
+            done++;
+            if (err) regFailed.push(m.name);
+            if (done === checked.length) {
+              btn.disabled = false; btn.textContent = 'Активировать';
+              var problems = unregFailed.concat(regFailed);
+              if (problems.length) {
+                showErr('s-err', 'Не удалось обновить: ' + problems.join(', ') + '. Попробуйте ещё раз.');
+              } else {
+                document.getElementById('s-activate-block').style.display = 'none';
+                document.getElementById('s-done-block').style.display = 'block';
+                BX24.fitWindow();
+              }
+            }
+          });
+        });
+      });
+    }
+
+    if (toRemove.length) {
+      var unregDone = 0;
+      toRemove.forEach(function(id) {
+        unregisterConnector(id, function(err) {
+          unregDone++;
+          if (err) {
+            var rm = MESSENGERS.find(function(x) { return x.id === id; });
+            unregFailed.push(rm ? rm.name : id);
+          }
+          if (unregDone === toRemove.length) afterUnregister();
+        });
+      });
+    } else {
+      afterUnregister();
+    }
+  });
+
+  document.getElementById('s-reopen').addEventListener('click', function() {
+    document.getElementById('s-done-block').style.display = 'none';
+    document.getElementById('s-activate-block').style.display = 'block';
+    BX24.fitWindow();
+  });
+
+  showScreen('s-settings');
 }
 
-function renderSetupGrid(registered, lineId) {
-  var grid = document.getElementById('setup-grid');
-  grid.innerHTML = '';
+/* ── Dialog screen (from Contact Center tile) ── */
+function initDialogScreen() {
+  var selected    = null;
+  var customIconB64 = null;
 
-  MESSENGERS.forEach(function(m) {
+  var grid = document.getElementById('d-grid');
+  MESSENGERS.filter(function(m) { return enabledIds.indexOf(m.id) !== -1; }).forEach(function(m) {
     var card = document.createElement('div');
-    card.className = 'm-card' + (registered[m.id] ? ' registered' : '');
-    if (!lineId && registered[m.id]) { card.style.cursor = 'default'; }
-
-    card.innerHTML =
-      '<img src="' + m.icon + '" alt="' + m.name + '">' +
-      '<span class="m-name">' + m.name + '</span>' +
-      '<span class="m-tag">✓ зарегистрирован</span>';
-
+    card.className = 'm-card';
+    var img = document.createElement('img');
+    img.src = getIconSrc(m); img.width = 36; img.height = 36;
+    var lbl = document.createElement('div');
+    lbl.className = 'lbl'; lbl.textContent = m.name;
+    card.appendChild(img); card.appendChild(lbl);
     card.addEventListener('click', function() {
-      if (lineId) {
-        registered[m.id] ? openConfigScreen(m, lineId, 'contact_center') : registerAndConfig(m, card, lineId);
-      } else {
-        registerMessenger(m, card, registered);
-      }
+      document.querySelectorAll('#d-grid .m-card').forEach(function(c) { c.classList.remove('selected'); });
+      card.classList.add('selected');
+      selected = m;
+      customIconB64 = null;
+      document.getElementById('d-icon-preview').src = getIconSrc(m);
+      var isEmail = m.type === 'email';
+      document.getElementById('d-url-label').textContent = isEmail ? 'Адрес почты' : 'Ссылка';
+      document.getElementById('d-url').placeholder = isEmail ? 'info@company.ru' : 'https://…';
+      document.getElementById('d-url').value  = m.url;
+      document.getElementById('d-name').value = m.name;
+      document.getElementById('d-form').style.display = 'block';
+      BX24.fitWindow();
     });
-
     grid.appendChild(card);
   });
-}
 
-function registerAndConfig(m, card, lineId) {
-  card.style.opacity = '.5';
-  card.style.pointerEvents = 'none';
-  BX24.callMethod('imconnector.register', {
-    ID: m.id, NAME: m.name,
-    ICON: { DATA_IMAGE: m.icon, COLOR: m.color },
-    PLACEMENT_HANDLER: HANDLER_URL
-  }, function(result) {
-    card.style.opacity = '';
-    card.style.pointerEvents = '';
-    if (result.error()) {
-      alert('Ошибка регистрации ' + m.name + ': ' + errMsg(result.error()));
-      return;
-    }
-    openConfigScreen(m, lineId, 'contact_center');
-  });
-}
-
-function registerMessenger(m, card, registered) {
-  if (registered[m.id]) { return; } // уже зарегистрирован
-
-  card.style.opacity = '.5';
-  card.style.pointerEvents = 'none';
-
-  BX24.callMethod('imconnector.register', {
-    ID:                m.id,
-    NAME:              m.name,
-    ICON:              { DATA_IMAGE: m.icon, COLOR: m.color },
-    PLACEMENT_HANDLER: HANDLER_URL
-  }, function(result) {
-    card.style.opacity = '';
-    card.style.pointerEvents = '';
-
-    if (result.error()) {
-      alert('Ошибка регистрации ' + m.name + ': ' + errMsg(result.error()));
-      return;
-    }
-
-    registered[m.id] = true;
-    card.classList.add('registered');
-
-    var status = document.getElementById('setup-status');
-    status.textContent = '✓ ' + m.name + ' зарегистрирован. Теперь его можно добавить в Открытую линию.';
-    status.style.display = 'block';
-    setTimeout(function() { status.style.display = 'none'; }, 4000);
-  });
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Экран 2: Настройка коннектора на Открытой линии
-// ─────────────────────────────────────────────────────────────────────────────
-function openConfigScreen(messenger, lineId, source) {
-  document.getElementById('cfg-icon').src   = messenger.icon;
-  document.getElementById('cfg-title').textContent = messenger.name;
-  document.getElementById('input-name').value = messenger.name;
-  document.getElementById('input-url').value  = '';
-  document.getElementById('input-url').placeholder = messenger.urlTemplate || 'https://...';
-  document.getElementById('custom-icon-field').style.display =
-    messenger.id === 'clnk_web' ? 'block' : 'none';
-
-  hideMsg('cfg-error');
-  hideMsg('cfg-success');
-
-  // Загрузить текущие настройки если коннектор уже настроен
-  BX24.callMethod('imconnector.status', { CONNECTOR: messenger.id, LINE: lineId }, function(res) {
-    if (!res.error()) {
-      var raw = res.data();
-      // Ответ может иметь разную структуру в зависимости от версии API
-      var d = (raw && raw.data) || (raw && raw.connector && raw.connector.data);
-      if (d) {
-        if (d.name) document.getElementById('input-name').value = d.name;
-        if (d.url)  document.getElementById('input-url').value  = d.url;
-      }
-    }
-    showScreen('screen-config');
+  setupIconUpload('d-icon-input', 'd-icon-btn', 'd-icon-preview', 'd-err', function(data) {
+    customIconB64 = data;
   });
 
-  // Кнопка «Назад» возвращает на главную
-  document.getElementById('back-btn').onclick = function() {
-    loadSetupScreen(source === 'contact_center' ? lineId : null);
-  };
+  document.getElementById('d-icon-reset').addEventListener('click', function() {
+    if (!selected) return;
+    customIconB64 = null;
+    if (customIcons[selected.id]) {
+      delete customIcons[selected.id];
+      BX24.callMethod('app.option.set', { options: { custom_icons: JSON.stringify(customIcons) } }, function(r) {
+        if (r.error()) console.error('app.option.set (custom_icons) failed:', r.error());
+      });
+      registerConnector(selected, null, function(err) {
+        if (err) console.error('registerConnector failed on icon reset:', err);
+      });
+    }
+    document.getElementById('d-icon-preview').src = imgSrc(selected.key);
+  });
 
-  // Кнопка «Сохранить»
-  document.getElementById('save-btn').onclick = function() {
-    saveConfig(messenger, lineId);
-  };
+  BX24.callMethod('imopenlines.lines.list', {}, function(r) {
+    var d = (!r.error() && r.data()) ? r.data() : [];
+    var lines = Array.isArray(d) ? d : Object.values(d);
+    var sel = document.getElementById('d-line');
+    sel.innerHTML = '';
+    if (r.error()) {
+      sel.innerHTML = '<option value="">— ошибка загрузки линий —</option>';
+    } else if (!lines.length) {
+      sel.innerHTML = '<option value="">— нет открытых линий —</option>';
+    } else {
+      lines.forEach(function(line) {
+        var opt = document.createElement('option');
+        opt.value = String(line.ID || line.id || '');
+        opt.textContent = line.NAME || line.name || opt.value;
+        sel.appendChild(opt);
+      });
+    }
+  });
 
-  // Превью кастомной иконки
-  document.getElementById('input-icon').oninput = function() {
-    var url = this.value.trim();
-    var preview = document.getElementById('icon-preview-img');
-    if (url) { preview.src = url; preview.style.display = 'block'; }
-    else     { preview.style.display = 'none'; }
-  };
-}
+  document.getElementById('d-save').addEventListener('click', function() {
+    if (!selected) { showErr('d-err', 'Выберите мессенджер'); return; }
+    var input  = document.getElementById('d-url').value.trim();
+    var name   = document.getElementById('d-name').value.trim();
+    var lineId = document.getElementById('d-line').value;
+    var isEmail = selected.type === 'email';
+    if (!input) { showErr('d-err', isEmail ? 'Введите адрес почты' : 'Введите ссылку'); return; }
+    if (isEmail) {
+      if (!isValidEmail(input)) { showErr('d-err', 'Похоже, это не email. Проверьте формат, например info@company.ru'); return; }
+    } else if (!isValidUrl(input)) {
+      showErr('d-err', 'Похоже, это не ссылка. Проверьте формат, например https://t.me/name'); return;
+    }
+    if (!name)   { showErr('d-err', 'Введите название'); return; }
+    if (!lineId) { showErr('d-err', 'Выберите Открытую линию'); return; }
+    hideErr('d-err');
+    var url = isEmail ? mailPageLink(input) : input;
 
-function saveConfig(messenger, lineId) {
-  var name = document.getElementById('input-name').value.trim();
-  var url  = document.getElementById('input-url').value.trim();
+    var btn = document.getElementById('d-save');
+    btn.disabled = true; btn.textContent = 'Подключение…';
 
-  if (!name) { showError('cfg-error', 'Введите название кнопки'); return; }
-  if (!url)  { showError('cfg-error', 'Введите ссылку');           return; }
-
-  hideMsg('cfg-error');
-
-  var btn = document.getElementById('save-btn');
-  btn.disabled = true;
-  btn.textContent = 'Сохранение…';
-
-  // Шаг 1: активировать коннектор на линии
-  BX24.callMethod('imconnector.activate', { CONNECTOR: messenger.id, LINE: lineId }, function(r1) {
-    if (r1.error()) {
-      btn.disabled = false; btn.textContent = 'Сохранить';
-      showError('cfg-error', 'Ошибка активации: ' + errMsg(r1.error()));
-      return;
+    if (customIconB64) {
+      customIcons[selected.id] = customIconB64;
+      BX24.callMethod('app.option.set', { options: { custom_icons: JSON.stringify(customIcons) } }, function(r) {
+        if (r.error()) console.error('app.option.set (custom_icons) failed:', r.error());
+      });
     }
 
-    // Шаг 2: установить данные (url и name)
-    BX24.callMethod('imconnector.connector.data.set', {
-      CONNECTOR: messenger.id,
-      LINE:      lineId,
-      DATA: {
-        id:     messenger.id + '_' + lineId,
-        url:    url,
-        url_im: url,
-        name:   name
-      }
-    }, function(r2) {
-      btn.disabled = false; btn.textContent = 'Сохранить';
-
-      if (r2.error()) {
-        showError('cfg-error', 'Ошибка сохранения: ' + errMsg(r2.error()));
+    registerConnector(selected, customIconB64 || null, function(regErr) {
+      if (regErr) {
+        btn.disabled = false; btn.textContent = 'Подключить';
+        showErr('d-err', 'Ошибка регистрации коннектора: ' + (regErr.ex ? regErr.ex.error_description : String(regErr)));
         return;
       }
-
-      var succ = document.getElementById('cfg-success');
-      succ.textContent = '✓ Сохранено. Добавьте эту Открытую линию в Виджет на сайт.';
-      succ.style.display = 'block';
-
-      // Закрыть слайдер через 1.5 сек
-      setTimeout(function() { BX24.closeApplication(); }, 1500);
+      BX24.callMethod('imconnector.activate', { CONNECTOR: selected.id, LINE: lineId, ACTIVE: 1 }, function(r1) {
+        if (r1.error()) {
+          btn.disabled = false; btn.textContent = 'Подключить';
+          showErr('d-err', 'Ошибка: ' + (r1.error().ex ? r1.error().ex.error_description : String(r1.error())));
+          return;
+        }
+        BX24.callMethod('imconnector.connector.data.set', {
+          CONNECTOR: selected.id, LINE: lineId,
+          DATA: { url: url, url_im: url, name: name }
+        }, function(r2) {
+          btn.disabled = false; btn.textContent = 'Подключить';
+          if (r2.error()) { showErr('d-err', 'Ошибка сохранения данных'); return; }
+          document.getElementById('d-ok').style.display = 'block';
+          setTimeout(function() { BX24.closeApplication(); }, 2000);
+        });
+      });
     });
   });
+
+  showScreen('s-dialog');
+}
+
+/* ── Placement screen (from Open Lines) ── */
+function initPlacementScreen(connectorId, lineId) {
+  var m = MESSENGERS.find(function(x) { return x.id === connectorId; });
+  var customIconB64 = null;
+
+  var header = document.getElementById('pl-header');
+  var defaultIconSrc = m ? getIconSrc(m) : imgSrc('web');
+
+  var isEmail = m && m.type === 'email';
+  document.getElementById('pl-url-label').textContent = isEmail ? 'Адрес почты' : 'Ссылка';
+  document.getElementById('pl-url').placeholder = isEmail ? 'info@company.ru' : 'https://…';
+
+  if (m) {
+    var img = document.createElement('img');
+    img.src = defaultIconSrc; img.width = 40; img.height = 40;
+    var lbl = document.createElement('strong');
+    lbl.textContent = m.name;
+    header.appendChild(img); header.appendChild(lbl);
+    document.getElementById('pl-url').value  = m.url;
+    document.getElementById('pl-name').value = m.name;
+  } else if (connectorId) {
+    header.textContent = connectorId;
+  }
+
+  document.getElementById('pl-icon-preview').src = defaultIconSrc;
+
+  setupIconUpload('pl-icon-input', 'pl-icon-btn', 'pl-icon-preview', 'pl-err', function(data) {
+    customIconB64 = data;
+  });
+
+  document.getElementById('pl-icon-reset').addEventListener('click', function() {
+    if (!m) return;
+    customIconB64 = null;
+    if (customIcons[m.id]) {
+      delete customIcons[m.id];
+      BX24.callMethod('app.option.set', { options: { custom_icons: JSON.stringify(customIcons) } }, function(r) {
+        if (r.error()) console.error('app.option.set (custom_icons) failed:', r.error());
+      });
+      registerConnector(m, null, function(err) {
+        if (err) console.error('registerConnector failed on icon reset:', err);
+      });
+    }
+    document.getElementById('pl-icon-preview').src = imgSrc(m.key);
+  });
+
+  document.getElementById('pl-save').addEventListener('click', function() {
+    var input = document.getElementById('pl-url').value.trim();
+    var name = document.getElementById('pl-name').value.trim();
+    if (!input) { showErr('pl-err', isEmail ? 'Введите адрес почты' : 'Введите ссылку'); return; }
+    if (isEmail) {
+      if (!isValidEmail(input)) { showErr('pl-err', 'Похоже, это не email. Проверьте формат, например info@company.ru'); return; }
+    } else if (!isValidUrl(input)) {
+      showErr('pl-err', 'Похоже, это не ссылка. Проверьте формат, например https://t.me/name'); return;
+    }
+    if (!name)   { showErr('pl-err', 'Введите название'); return; }
+    if (!lineId) { showErr('pl-err', 'Открытая линия не определена'); return; }
+    hideErr('pl-err');
+    var url = isEmail ? mailPageLink(input) : input;
+
+    var btn = document.getElementById('pl-save');
+    btn.disabled = true; btn.textContent = 'Сохранение…';
+
+    if (customIconB64 && m) {
+      customIcons[m.id] = customIconB64;
+      BX24.callMethod('app.option.set', { options: { custom_icons: JSON.stringify(customIcons) } }, function(r) {
+        if (r.error()) console.error('app.option.set (custom_icons) failed:', r.error());
+      });
+      registerConnector(m, customIconB64, function(err) {
+        if (err) console.error('registerConnector failed on icon update:', err);
+      });
+    }
+
+    BX24.callMethod('imconnector.activate', { CONNECTOR: connectorId, LINE: lineId, ACTIVE: 1 }, function(r1) {
+      if (r1.error()) {
+        btn.disabled = false; btn.textContent = 'Сохранить';
+        showErr('pl-err', 'Ошибка: ' + (r1.error().ex ? r1.error().ex.error_description : String(r1.error())));
+        return;
+      }
+      BX24.callMethod('imconnector.connector.data.set', {
+        CONNECTOR: connectorId, LINE: lineId,
+        DATA: { url: url, url_im: url, name: name }
+      }, function(r2) {
+        btn.disabled = false; btn.textContent = 'Сохранить';
+        if (r2.error()) { showErr('pl-err', 'Ошибка сохранения данных'); return; }
+        document.getElementById('pl-ok').style.display = 'block';
+        setTimeout(function() { BX24.closeApplication(); }, 1500);
+      });
+    });
+  });
+
+  showScreen('s-pl');
 }
 </script>
 </body>

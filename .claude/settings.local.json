@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:apidocs.bitrix24.ru)",
+      "WebFetch(domain:apidocs.bitrix24.com)",
+      "Bash(curl -s \"https://apidocs.bitrix24.com/api-reference/widgets/placements/index.html\" --max-time 15)",
+      "Bash(python -c 'import sys; from html.parser import HTMLParser; *)",
+      "Bash(curl -s \"https://apidocs.bitrix24.com/api-reference/widgets/contact-center/index.html\" --max-time 15)",
+      "Bash(curl -s \"https://apidocs.bitrix24.com/api-reference/widgets/messenger/index.html\" --max-time 15)",
+      "Bash(curl -s \"https://apidocs.bitrix24.com/api-reference/imconnector/index.html\" --max-time 15)",
+      "Bash(curl -s \"https://apidocs.bitrix24.com/api-reference/widgets/im/index.html\" --max-time 15)"
+    ]
+  }
+}
