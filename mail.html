@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Напишите нам на почту</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #333; background: #fff; padding: 20px; }
+.wrap { text-align: center; max-width: 360px; margin: 40px auto; padding: 24px 8px; }
+.mail-ico { width: 56px; height: 56px; margin: 0 auto 16px; display: block; }
+h2 { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 18px; }
+.addr { display: inline-block; font-size: 18px; font-weight: 600; color: #5C8DEA; text-decoration: none; word-break: break-all; margin-bottom: 20px; line-height: 1.4; }
+.addr:hover { text-decoration: underline; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; background: #5C8DEA; color: #fff; transition: background .15s; }
+.btn:hover { background: #4a78d4; }
+.copied { color: #27ae60; font-size: 13px; margin-top: 10px; height: 16px; }
+.hint { font-size: 12px; color: #999; margin-top: 16px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <svg class="mail-ico" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="20" r="20" fill="#5C8DEA"/>
+    <rect x="10" y="13" width="20" height="14" rx="2.5" fill="#fff"/>
+    <path d="M11 15l9 6 9-6" stroke="#5C8DEA" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <h2>Напишите нам на почту</h2>
+  <a id="mail-addr" class="addr" href="#">—</a>
+  <button class="btn" id="mail-copy">Скопировать адрес</button>
+  <div class="copied" id="mail-copied"></div>
+  <p class="hint">Нажмите на адрес, чтобы написать письмо, или скопируйте его и вставьте в свою почту.</p>
+</div>
+<script>
+var email  = new URLSearchParams(window.location.search).get('to') || '';
+var addr   = document.getElementById('mail-addr');
+var btn    = document.getElementById('mail-copy');
+var copied = document.getElementById('mail-copied');
+
+addr.textContent = email || '—';
+addr.href = email ? 'mailto:' + email : '#';
+
+btn.addEventListener('click', function() {
+  if (!email) return;
+  function done() {
+    copied.textContent = '✓ Скопировано';
+    setTimeout(function() { copied.textContent = ''; }, 2500);
+  }
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = email; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); }
+    catch(e) { copied.textContent = email; }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(email).then(done, fallback);
+  } else { fallback(); }
+});
+</script>
+</body>
+</html>
